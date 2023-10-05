@@ -74,12 +74,6 @@ class DTable:
         return_table = np.vstack((header, return_table))
         return DTable(return_table)
 
-    def select(self, row_label, col_label):
-        col_index = np.where(self.get_columns() == col_label)
-        row_index = np.where(self.table[:, col_index] == row_label)
-        print(row_index, col_index)
-        return self.table[row_index, col_index]
-
     def get(self, row: int, col: int) -> str | float:
         r = self.table[row, col]
 
