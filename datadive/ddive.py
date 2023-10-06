@@ -303,7 +303,10 @@ class DTable:
         # Return new DTable using the new numpy array built
         return DTable(table, columns=self.columns)
 
+    def intersection(self, dt):
+        pass
 
+    
 def read_csv(file_path: str) -> DTable:
     """
     Reads a csv file to create a dictionary holding keys as columns
