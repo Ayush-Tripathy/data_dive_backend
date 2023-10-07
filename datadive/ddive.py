@@ -148,33 +148,34 @@ class DTable:
         # Return a DTable based on the new_table data
         return DTable(new_table)
 
-    def get(self, row: int, col: int) -> str | float:
+    def get(self, row: int, col: int = None):
         """
-        Returns the element present at specified row and column of the table
+        If col, it returns the element present at specified row and column of the table,
+        If col is None returns the row present at specified index of the table
+
         :param row:
         :param col:
-        :return: str | float
+        :return: str | float | DTable
         """
-        r = self.table[row, col]
 
+        if col is None:
+            # Building new table from the row index
+            r = self.table[row + 1]
+            r = np.vstack((self.columns, r))
+
+            # Return a new DTable from only the row specified
+            return DTable(r)
+
+        r = self.table[row, col]
+        col_name = self.columns[col]
         try:
             r = float(r)
         except ValueError:
             r = str(r)
 
-        return r
+        r = np.array(r)
+        r = np.vstack((col_name, r))
 
-    def get(self, row: int):
-        """
-        Returns the row present at specified index of the table
-        :param row:
-        """
-
-        # Building new table from the row index
-        r = self.table[row+1]
-        r = np.vstack((self.columns, r))
-
-        # Return a new DTable from only the row specified
         return DTable(r)
 
     def where(self, column: str, operator: str, value: str | int | float):
@@ -303,9 +304,8 @@ class DTable:
         return DTable(table, columns=self.columns)
 
     def intersection(self, dt):
-        # Converting the tables into arrays
-        table1 = np.array(self.table[1:])
-        table2 = np.array(dt.table[1:])
+        table1 = self.table[1:]
+        table2 = dt.table[1:]
 
         # Converting the rows to tuples to make them hashable.
         table1_tuples = [tuple(row) for row in table1]
@@ -399,30 +399,18 @@ dset = {
 start = time.time()
 
 dt = read_csv("dsets/ign.csv")
-# print(dt.get_column("release_day").info())
-# print(dt.get(10291, 1))
-# print(type(dt.get(1, 2)))
+# print(dt.select_column("release_day").info())
+# print(dt.get(1))
+# print(dt.get(2434, 5))
 # print(dt.table[:, [0, 5, 1]])
 # print(dt.select_columns(["score", "score_phrase", "", "editors_choice", "title"]))
-
+#
 # print(dt.where("title", "contains", "Wolf").info())
-# dt2 = dt.where("title", "contains", "Wolf")
-# dt3 = dt.where("editors_choice", "==", "Y")
-print(dt.where("editors_choice", "==", "Y").info())
-
+# print(dt.where("editors_choice", "==", "Y").info())
+#
 dt2 = dt.where("title", "contains", "Wolf")
-dt3 = dt.where("editors_choice", "==","Y")
-
-
+dt3 = dt.where("editors_choice", "==", "Y")
 print(dt2.intersection(dt3).info())
+
 end = time.time()
 print(f"T1: {end - start}")
-
-# import pandas as pd
-#
-# s2 = time.time()
-# df = pd.read_csv("dsets/ign.csv")
-# print(df["release_day"])
-# e2 = time.time()
-#
-# print(f"T2: {e2 - s2}")
