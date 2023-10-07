@@ -345,6 +345,7 @@ class DTable:
 
         # Returning the intersection
 
+
         return DTable(intersection_table)
     
     def variance(self, column):
@@ -406,9 +407,6 @@ class DTable:
 
         # Return the HTML form of the DTable
         return dt_html
-    
-    
-
 
 
 def read_csv(file_path: str) -> DTable:
@@ -534,9 +532,10 @@ dt = read_csv("dsets/ign.csv")
 # print(dt.where("title", "contains", "Wolf").info())
 # print(dt.where("editors_choice", "==", "Y").info())
 #
-dt2 = dt.where("title", "contains", "Wolf")
-dt3 = dt.where("editors_choice", "==", "Y")
-print(dt2.intersection(dt3).info())
+#dt2 = dt.where("title", "contains", "Wolf")
+#dt3 = dt.where("editors_choice", "==", "Y")
+#print(dt2.intersection(dt3).info())
+#print(dt.variance('score'))
 
 
 end = time.time()
