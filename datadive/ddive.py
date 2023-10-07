@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import os  # Only used for checking the size of dataset file
 
@@ -8,6 +9,7 @@ class DTable:
     """
     Represents a Table, in form of a 2D numpy array
     """
+
     def __init__(self, initial_table: dict | np.ndarray = None, columns: list | np.ndarray = None):
         if initial_table is None:
             self.table = np.array([])
@@ -37,7 +39,8 @@ class DTable:
             self.column_types = {column: None for column in self.columns}
 
         else:
-            raise ValueError("'initial_table' should be a instance of dict or np.ndarray or None")
+            raise ValueError(
+                "'initial_table' should be a instance of dict or np.ndarray or None")
 
         if columns is not None:
             # if len(columns) != len(self.columns):
@@ -61,7 +64,8 @@ class DTable:
         if len(self.table) == 0:
             rows = "Empty Table"
         elif len(self.table) < max_display_rows:
-            rows = "\n".join("\t".join(str(cell)[:10] for cell in row) for row in self.table)
+            rows = "\n".join("\t".join(str(cell)[:10]
+                             for cell in row) for row in self.table)
         else:
             rows = "\n".join("\t".join(str(cell)[:10] for cell in row) for row in
                              np.concatenate((self.table[0:max_display_rows - 4], self.table[len(self.table) - 4:])))
@@ -126,7 +130,8 @@ class DTable:
 
         # Raise ValueError if any of the provided column names is not in the table
         if any(column not in self.columns for column in columns):
-            raise ValueError("Column list contains a column, which is not present in the table")
+            raise ValueError(
+                "Column list contains a column, which is not present in the table")
 
         # Get indexes of the column names
         idxs = []
@@ -166,7 +171,7 @@ class DTable:
         """
 
         # Building new table from the row index
-        r = self.table[row]
+        r = self.table[row+1]
         r = np.vstack((self.columns, r))
 
         # Return a new DTable from only the row specified
@@ -203,7 +208,8 @@ class DTable:
         if operator == "==":
             if col_type == "Number":
                 if type(value) not in [int, float]:
-                    raise ArithmeticError(f"Invalid operand for column '{column}'")
+                    raise ArithmeticError(
+                        f"Can't compare a {col_type} with {type(value)}")
 
                 col = self.table[:, col_index][1:].astype("float")
 
@@ -217,14 +223,14 @@ class DTable:
                 idxs = np.where(col == value)[0]
                 idxs = np.array([idx + 1 for idx in idxs])
 
-            # Build new numpy array based on the indexes received
-            if len(idxs) != 0:
-                table = np.vstack((self.get_columns(), [self.table[idx, ] for idx in idxs]))
-
         elif operator == ">":
 
-            if col_type != "Number" or type(value) not in [int, float]:
+            if col_type != "Number":
                 raise ArithmeticError(f"Invalid operand for column '{column}'")
+
+            if type(value) not in [int, float]:
+                raise ArithmeticError(
+                    f"Can't compare a {col_type} with {type(value)}")
 
             col = self.table[:, col_index][1:].astype("float")
 
@@ -232,14 +238,14 @@ class DTable:
             idxs = np.where(col > value)[0]
             idxs = np.array([idx + 1 for idx in idxs])
 
-            # Build new numpy array based on the indexes received
-            if len(idxs) != 0:
-                table = np.vstack((self.get_columns(), [self.table[idx, ] for idx in idxs]))
-
         elif operator == "<":
 
-            if col_type != "Number" or type(value) not in [int, float]:
+            if col_type != "Number":
                 raise ArithmeticError(f"Invalid operand for column '{column}'")
+
+            if type(value) not in [int, float]:
+                raise ArithmeticError(
+                    f"Can't compare a {col_type} with {type(value)}")
 
             col = self.table[:, col_index][1:].astype("float")
 
@@ -247,14 +253,11 @@ class DTable:
             idxs = np.where(col < value)[0]
             idxs = np.array([idx + 1 for idx in idxs])
 
-            # Build new numpy array based on the indexes received
-            if len(idxs) != 0:
-                table = np.vstack((self.columns, [self.table[idx, ] for idx in idxs]))
-
         elif operator == "!=":
             if col_type == "Number":
                 if type(value) not in [int, float]:
-                    raise ArithmeticError(f"Invalid operand for column '{column}'")
+                    raise ArithmeticError(
+                        f"Can't compare a {col_type} with {type(value)}")
 
                 col = self.table[:, col_index][1:].astype("float")
 
@@ -267,10 +270,6 @@ class DTable:
                 # Get the indexes of field satisfying the condition
                 idxs = np.where(col != value)[0]
                 idxs = np.array([idx + 1 for idx in idxs])
-
-            # Build new numpy array based on the indexes received
-            if len(idxs) != 0:
-                table = np.vstack((self.get_columns(), [self.table[idx, ] for idx in idxs]))
 
         elif operator == "begins with":
             if col_type == "Number":
@@ -282,10 +281,6 @@ class DTable:
             idxs = np.where(np.char.startswith(col, value))[0]
             idxs = np.array([idx + 1 for idx in idxs])
 
-            # Build new numpy array based on the indexes received
-            if len(idxs) != 0:
-                table = np.vstack((self.get_columns(), [self.table[idx, ] for idx in idxs]))
-
         elif operator == "contains":
             if col_type == "Number":
                 raise ArithmeticError(f"Invalid operand for column '{column}'")
@@ -296,9 +291,13 @@ class DTable:
             idxs = np.where(np.char.find(col, value) != -1)[0]
             idxs = np.array([idx + 1 for idx in idxs])
 
-            # Build new numpy array based on the indexes received
-            if len(idxs) != 0:
-                table = np.vstack((self.get_columns(), [self.table[idx, ] for idx in idxs]))
+        else:
+            raise ValueError(f"Invalid operator '{operator}'")
+
+        # Build new numpy array based on the indexes received
+        if len(idxs) != 0:
+            table = np.vstack(
+                (self.get_columns(), [self.table[idx, ] for idx in idxs]))
 
         # Return new DTable using the new numpy array built
         return DTable(table, columns=self.columns)
@@ -367,7 +366,6 @@ dset = {
     "col6": ["cat", "cat", "cat", "cat"]
 }
 
-import time
 
 # s2 = time.time()
 # t = DTable(dset)
@@ -386,7 +384,10 @@ dt = read_csv("dsets/ign.csv")
 # print(type(dt.get(1, 2)))
 # print(dt.table[:, [0, 5, 1]])
 # print(dt.select_columns(["score", "score_phrase", "", "editors_choice", "title"]))
-print(dt.where("title", "contains", "Wolf").info())
+# print(dt.where("title", "contains", "Wolf").info())
+# dt2 = dt.where("title", "contains", "Wolf")
+# dt3 = dt.where("editors_choice", "==", "Y")
+print(dt.where("editors_choice", "==", "Y").info())
 
 end = time.time()
 print(f"T1: {end - start}")
