@@ -325,7 +325,7 @@ class DTable:
         intersection_table = np.array(intersection)
         intersection_table = np.vstack((self.columns, intersection_table))
 
-        # Displaying the intersection
+        # Returning the intersection
         return DTable(intersection_table, dtype=self.dtype)
 
     def to_html(self, file_name: str = None):
@@ -364,6 +364,17 @@ class DTable:
 
         # Return the HTML form of the DTable
         return dt_html
+    
+    def variance(self, column):
+        # Storing the values in an array.
+        data_array = self.select_column(column).table[:, -1][1:].astype('float')
+
+        # Calculating variance
+        overall_variance = np.var(data_array, axis=None)
+
+        # Returning the Variance
+        return overall_variance
+
 
 
 def read_csv(file_path: str) -> DTable:
@@ -473,6 +484,7 @@ start = time.time()
 
 dt = read_csv("dsets/ign.csv")
 # print(dt)
+
 
 end = time.time()
 print(f"T1: {end - start}")
