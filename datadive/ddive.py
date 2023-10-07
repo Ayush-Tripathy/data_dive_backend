@@ -304,9 +304,26 @@ class DTable:
         return DTable(table, columns=self.columns)
 
     def intersection(self, dt):
-        pass
+        # Converting the tables into arrays
+        table1 = np.array(self.table[1:])
+        table2 = np.array(dt.table[1:])
 
-    
+        # Converting the rows to tuples to make them hashable.
+        table1_tuples = [tuple(row) for row in table1]
+        table2_tuples = [tuple(row) for row in table2] 
+
+        # Finding intersection of the two tables
+        intersection = set(table1_tuples) & set(table2_tuples)
+        intersection = list(intersection)
+
+        # Converting the intersection table again into numpy array
+        intersection_table = np.array(intersection)
+        intersection_table = np.vstack((self.columns, intersection_table))
+
+        # Displaying the intersection
+        return DTable(intersection_table)
+
+
 def read_csv(file_path: str) -> DTable:
     """
     Reads a csv file to create a dictionary holding keys as columns
@@ -389,8 +406,10 @@ dt = read_csv("dsets/ign.csv")
 # print(type(dt.get(1, 2)))
 # print(dt.table[:, [0, 5, 1]])
 # print(dt.select_columns(["score", "score_phrase", "", "editors_choice", "title"]))
-print(dt.where("title", "contains", "Wolf").info())
+dt2 = dt.where("title", "contains", "Wolf")
+dt3 = dt.where("editors_choice", "==","Y")
 
+print(dt2.intersection(dt3).info())
 end = time.time()
 print(f"T1: {end - start}")
 
