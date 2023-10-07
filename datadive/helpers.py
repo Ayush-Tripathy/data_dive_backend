@@ -15,6 +15,7 @@ def get_related_condition_types(dtype: str):
         return ["is", "is not"]
     elif dtype == valid_types[3]:
         return ["is", "is not"]
+<<<<<<< HEAD
 
 
 def read_csv_v2(file_path: str, dtype: str = "<U255") -> DTable:
@@ -87,3 +88,5 @@ def select_rows(c_dt: DTable, conditions: list[list]) -> DTable:
         new_dt = new_dt.intersection(dt)
 
     return new_dt
+=======
+>>>>>>> c2a892b (Modified DTable.get() method, created datadive/helpers module)

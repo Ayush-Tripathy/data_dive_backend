@@ -187,17 +187,9 @@ class DTable:
         r = np.vstack((col_name, r))
 
 
-    def get(self, row: int):
-        """
-        Returns the row present at specified index of the table
-        :param row:
-        """
 
-        # Building new table from the row index
-        r = self.table[row+1]
-        r = np.vstack((self.columns, r))
 
-        # Return a new DTable from only the row specified
+
         return DTable(r)
 
         return DTable(r, dtype=self.dtype)
@@ -332,6 +324,8 @@ class DTable:
         if not isinstance(dt, DTable):
             raise ValueError("Passed parameter is not an instance of DTable")
         
+
+
         table1 = self.table[1:]
         table2 = dt.table[1:]
 
@@ -524,10 +518,25 @@ start = time.time()
 
 dt = read_csv("dsets/ign.csv")
 
+
 #print(dt.variance('score'))
 
 # print(dt)
 #print(dt.standard_deviation('score'))
+
+
+# print(dt.select_column("release_day").info())
+# print(dt.get(1))
+# print(dt.get(2434, 5))
+# print(dt.table[:, [0, 5, 1]])
+# print(dt.select_columns(["score", "score_phrase", "", "editors_choice", "title"]))
+#
+# print(dt.where("title", "contains", "Wolf").info())
+# print(dt.where("editors_choice", "==", "Y").info())
+#
+dt2 = dt.where("title", "contains", "Wolf")
+dt3 = dt.where("editors_choice", "==", "Y")
+print(dt2.intersection(dt3).info())
 
 
 end = time.time()
