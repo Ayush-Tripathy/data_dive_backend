@@ -319,8 +319,18 @@ class DTable:
         intersection_table = np.array(intersection)
         intersection_table = np.vstack((self.columns, intersection_table))
 
-        # Displaying the intersection
+        # Returning the intersection
         return DTable(intersection_table)
+    
+    def variance(self, column):
+        # Storing the values in an array.
+        data_array = self.select_column(column).table[:, -1][1:].astype('float')
+
+        # Calculating variance
+        overall_variance = np.var(data_array, axis=None)
+
+        # Returning the Variance
+        return overall_variance
 
 
 def read_csv(file_path: str) -> DTable:
@@ -408,9 +418,10 @@ dt = read_csv("dsets/ign.csv")
 # print(dt.where("title", "contains", "Wolf").info())
 # print(dt.where("editors_choice", "==", "Y").info())
 #
-dt2 = dt.where("title", "contains", "Wolf")
-dt3 = dt.where("editors_choice", "==", "Y")
-print(dt2.intersection(dt3).info())
+#dt2 = dt.where("title", "contains", "Wolf")
+#dt3 = dt.where("editors_choice", "==", "Y")
+#print(dt2.intersection(dt3).info())
+#print(dt.variance('score'))
 
 end = time.time()
 print(f"T1: {end - start}")
