@@ -375,6 +375,9 @@ class DTable:
         # Returning the Variance
         return overall_variance
 
+    def count(column: str) -> int:
+        pass
+
 
 
 def read_csv(file_path: str) -> DTable:
