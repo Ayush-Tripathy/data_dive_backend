@@ -375,8 +375,33 @@ class DTable:
         # Returning the Variance
         return overall_variance
 
-    def count(column: str) -> int:
-        pass
+    def count(self, column: str) -> int:
+        """
+        Returns the count of (defined) values present in specified column
+        """
+        if column not in self.columns:
+            raise ValueError(f"'{column}' not found")
+        
+        # Get column values
+        col = self.select_column(column).table[:, 1][1:]
+        
+        # Filter not nan values
+        filtered_col = col[col != "nan"]
+
+        return len(filtered_col)
+
+    def median(self, column):
+        """
+        Returns the median of input column 
+        """
+        if column not in self.columns:
+            raise ValueError(f"'{column}' not found")
+        
+        col = self.select_column(column).table[:, 1][1:].astype("float")
+
+        median = np.median(col)
+
+        return median
 
 
 
@@ -486,7 +511,7 @@ dset = {
 start = time.time()
 
 dt = read_csv("dsets/ign.csv")
-# print(dt)
+print(dt.median("score"))
 
 
 end = time.time()
