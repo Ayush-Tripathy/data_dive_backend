@@ -1,6 +1,5 @@
 import time
 import numpy as np
-import os  # Only used for checking the size of dataset file
 
 max_display_rows = 10
 
@@ -10,7 +9,17 @@ class DTable:
     Represents a Table, in form of a 2D numpy array
     """
 
-    def __init__(self, initial_table: dict | np.ndarray = None, columns: list | np.ndarray = None):
+
+    
+
+    def __init__(self,
+                 initial_table: dict | np.ndarray = None,
+                 columns: list | np.ndarray = None,
+                 dtype: str = "<U255"):
+
+        self.dtype = dtype
+
+
         if initial_table is None:
             self.table = np.array([])
 
@@ -19,7 +28,7 @@ class DTable:
 
             self.columns = np.array([key for key in initial_table.keys()])
             column_data = [initial_table[key] for key in initial_table.keys()]
-            self.table = np.array(column_data, dtype="<U255").T
+            self.table = np.array(column_data, dtype=dtype).T
             self.table = np.insert(self.table, 0, self.columns, axis=0)
             # self.table = self.table[1:].astype(float)
             self.column_types = {column: None for column in self.columns}
@@ -29,7 +38,7 @@ class DTable:
 
             self.columns = initial_table[0]
             column_data = initial_table[1:]
-            self.table = np.array(column_data, dtype="<U255")
+            self.table = np.array(column_data, dtype=dtype)
             # self.table = np.insert(self.table, 0, column_names, axis=0)
             self.table = np.vstack((self.columns, self.table))
             self.column_types = {column: None for column in self.columns}
@@ -53,7 +62,8 @@ class DTable:
             unique_values = set(values)
             if len(unique_values) == 2:
                 self.column_types[header] = "Boolean"
-            elif all(value.replace('.', '', 1).isdigit() or (value[1:].replace('.', '', 1).isdigit() and value[0] == '-') for value in values):
+            elif all(value.replace('.', '', 1).isdigit() or
+                     (value[1:].replace('.', '', 1).isdigit() and value[0] == '-') for value in values):
                 self.column_types[header] = "Number"
             elif len(set(values)) < len(values) / 2:
                 self.column_types[header] = 'Category'
@@ -119,7 +129,7 @@ class DTable:
         header = np.array(["", column])
         return_table = np.vstack((header, return_table))
 
-        return DTable(return_table)
+        return DTable(return_table, dtype=self.dtype)
 
     def select_columns(self, columns: list | np.ndarray):
         """
@@ -146,23 +156,36 @@ class DTable:
         new_table = np.vstack((idx_row, new_table.T)).T
 
         # Return a DTable based on the new_table data
-        return DTable(new_table)
+        return DTable(new_table, dtype=self.dtype)
 
-    def get(self, row: int, col: int) -> str | float:
+    def get(self, row: int, col: int = None):
         """
-        Returns the element present at specified row and column of the table
+        If col, it returns the element present at specified row and column of the table,
+        If col is None returns the row present at specified index of the table
+
         :param row:
         :param col:
-        :return: str | float
+        :return: str | float | DTable
         """
-        r = self.table[row, col]
 
+        if col is None:
+            # Building new table from the row index
+            r = self.table[row + 1]
+            r = np.vstack((self.columns, r))
+
+            # Return a new DTable from only the row specified
+            return DTable(r)
+
+        r = self.table[row, col]
+        col_name = self.columns[col]
         try:
             r = float(r)
         except ValueError:
             r = str(r)
 
-        return r
+        r = np.array(r)
+        r = np.vstack((col_name, r))
+
 
     def get(self, row: int):
         """
@@ -176,6 +199,9 @@ class DTable:
 
         # Return a new DTable from only the row specified
         return DTable(r)
+
+        return DTable(r, dtype=self.dtype)
+
 
     def where(self, column: str, operator: str, value: str | int | float):
         """
@@ -300,12 +326,14 @@ class DTable:
                 (self.get_columns(), [self.table[idx, ] for idx in idxs]))
 
         # Return new DTable using the new numpy array built
-        return DTable(table, columns=self.columns)
+        return DTable(table, columns=self.columns, dtype=self.dtype)
 
     def intersection(self, dt):
-        # Converting the tables into arrays
-        table1 = np.array(self.table[1:])
-        table2 = np.array(dt.table[1:])
+        if not isinstance(dt, DTable):
+            raise ValueError("Passed parameter is not an instance of DTable")
+        
+        table1 = self.table[1:]
+        table2 = dt.table[1:]
 
         # Converting the rows to tuples to make them hashable.
         table1_tuples = [tuple(row) for row in table1]
@@ -317,19 +345,73 @@ class DTable:
 
         # Converting the intersection table again into numpy array
         intersection_table = np.array(intersection)
+        if len(intersection_table) == 0:
+            return DTable(np.array([self.columns]))
         intersection_table = np.vstack((self.columns, intersection_table))
 
         # Returning the intersection
+
         return DTable(intersection_table)
     
     def variance(self, column):
         # Storing in an array.
-        data_array = self.select_column(column).table[:, 1][1:].astype('float')
+        data_array = self.select_column(column).table[:, 1][1:]
+        data_array = data_array[data_array != "nan"]
+        data_array = data_array.astype('float')
         
         # Calculating Variance
         overall_variance = np.var(data_array)
         
         # Returning the calculated Variance.
+
+        return DTable(intersection_table, dtype=self.dtype)
+
+    def to_html(self, file_name: str = None):
+        """
+        Builds HTML string for the DTable
+        If file_name is not None then it writes the HTML string to the file
+        Note: It overwrites the file
+
+        :param file_name:
+        :return: str
+        """
+
+        style = "<style>" \
+                "table, td, th {" \
+                "padding: 10px;" \
+                "border: 1px solid black;" \
+                "border-collapse: collapse;" \
+                "}" \
+                "</style>"
+
+        # Create HTML table header row
+        header_row = "<tr>" + "".join(f"<th>{col}</th>" for col in self.table[0]) + "</tr>"
+
+        # Create HTML table data rows
+        data_rows = "".join("<tr>" +
+                            "".join(f"<td>"
+                                    f"{value}"
+                                    f"</td>" for value in row) + "</tr>" for row in self.table[1:])
+
+        # Build the HTML table
+        dt_html = style + f"<table>{header_row}{data_rows}</table>"
+
+        if file_name is not None:
+            with open(file_name, "w+", encoding='utf-8') as file:
+                file.write(dt_html)
+
+        # Return the HTML form of the DTable
+        return dt_html
+    
+    def variance(self, column):
+        # Storing the values in an array.
+        data_array = self.select_column(column).table[:, -1][1:].astype('float')
+
+        # Calculating variance
+        overall_variance = np.var(data_array, axis=None)
+
+        # Returning the Variance
+
         return overall_variance
 
 
@@ -343,6 +425,7 @@ def read_csv(file_path: str) -> DTable:
     :param file_path:
     :return: ddive.DTable
     """
+    import os  # Only used for checking the size of dataset file
 
     # size of file in KiB
     size_of_file = os.path.getsize(file_path) / 1024
@@ -352,7 +435,7 @@ def read_csv(file_path: str) -> DTable:
     if size_of_file > mib_10:
         raise Exception(f"Size of file ({size_of_file} KiB) is too large")
 
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding='utf-8') as file:
 
         # Get the column headers from the file
         headers = file.readline().strip().split(',')
@@ -369,7 +452,7 @@ def read_csv(file_path: str) -> DTable:
             inside_quote = False
             current_value = ''
 
-            for char in line:
+            for char in line.strip():
                 if char == '"':
                     inside_quote = not inside_quote
                 elif char == ',' and not inside_quote:
@@ -385,6 +468,35 @@ def read_csv(file_path: str) -> DTable:
 
         # Return DTable based on the values in file
         return DTable(data_dict)
+
+
+def read_html(html_str: str) -> DTable:
+    """
+    Reads HTML string to create numpy.array() of it, and
+    then returns a DTable object based on the created array.
+
+    **Note**: This method assumes that the passed string is a valid HTML string
+    if invalid HTML table string is passed it may cause errors,
+    use it cautiously.
+
+    :param html_str:
+    :return: DTable
+    """
+
+    # Split the string to remove all 'tr' tags
+    # Each element of the rows list will have single row of the HTML table
+    rows = html_str.split("<tr>")[1:-1]
+    rows = [v.split("</tr>")[0] for v in rows]
+
+    # Parse the headers
+    headers = np.array([header.split("</th>")[0] for header in rows[0].split("<th>") if "</th>" in header])
+
+    # Parse the values
+    values = np.array([[v.split("</td>")[0] for v in row.split("<td>") if "</td>" in v] for row in rows[1:]])
+
+    # Build and return Table
+    data = np.vstack((headers, values))
+    return DTable(data)
 
 
 # -------------- TESTING --------------------
@@ -410,15 +522,12 @@ dset = {
 start = time.time()
 
 dt = read_csv("dsets/ign.csv")
+
 #print(dt.variance('score'))
+
+# print(dt)
+
+
+
 end = time.time()
 print(f"T1: {end - start}")
-
-# import pandas as pd
-#
-# s2 = time.time()
-# df = pd.read_csv("dsets/ign.csv")
-# print(df["release_day"])
-# e2 = time.time()
-#
-# print(f"T2: {e2 - s2}")
