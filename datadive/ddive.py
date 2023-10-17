@@ -363,8 +363,18 @@ class DTable:
         overall_variance = np.var(data_array)
         
         # Returning the calculated Variance.
+        return overall_variance
+    
+    def standard_deviation(self, column):
+        data_array = self.select_column(column).table[:, 1][1:]
+        data_array = data_array[data_array != "nan"]
+        data_array = data_array.astype('float')
 
-        return DTable(intersection_table, dtype=self.dtype)
+        # Calculating Standard Deviation
+        overall_standard_deviation = np.std(data_array)
+
+        # Returning the calculated Standard Deviation.
+        return overall_standard_deviation
 
     def to_html(self, file_name: str = None):
         """
@@ -403,16 +413,7 @@ class DTable:
         # Return the HTML form of the DTable
         return dt_html
     
-    def variance(self, column):
-        # Storing the values in an array.
-        data_array = self.select_column(column).table[:, -1][1:].astype('float')
-
-        # Calculating variance
-        overall_variance = np.var(data_array, axis=None)
-
-        # Returning the Variance
-
-        return overall_variance
+    
 
 
 
@@ -526,7 +527,7 @@ dt = read_csv("dsets/ign.csv")
 #print(dt.variance('score'))
 
 # print(dt)
-
+#print(dt.standard_deviation('score'))
 
 
 end = time.time()
