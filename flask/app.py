@@ -35,9 +35,8 @@ def upload_file():
         return jsonify({'success': 'File uploaded successfully', 'file_path': filename, 'data': dt.to_html()})
 
 
-@app.route('/getcolumns', methods=['POST'])
+@app.route('/columns', methods=['POST'])
 def get_columns():
-    # print(request.data)
     dt = dd.read_html(str(request.data))
     columns = dt.get_columns().tolist()
     print(columns)
