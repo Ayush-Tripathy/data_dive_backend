@@ -8,10 +8,7 @@ class DTable:
     """
     Represents a Table, in form of a 2D numpy array
     """
-
-
     
-
     def __init__(self,
                  initial_table: dict | np.ndarray = None,
                  columns: list | np.ndarray = None,
@@ -186,12 +183,6 @@ class DTable:
         r = np.array(r)
         r = np.vstack((col_name, r))
 
-
-
-
-
-        return DTable(r)
-
         return DTable(r, dtype=self.dtype)
 
 
@@ -344,8 +335,6 @@ class DTable:
         intersection_table = np.vstack((self.columns, intersection_table))
 
         # Returning the intersection
-
-
         return DTable(intersection_table)
     
     def variance(self, column):
