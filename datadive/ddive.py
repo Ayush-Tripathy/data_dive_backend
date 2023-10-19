@@ -16,7 +16,6 @@ class DTable:
 
         self.dtype = dtype
 
-
         if initial_table is None:
             self.table = np.array([])
 
