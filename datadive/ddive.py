@@ -8,7 +8,7 @@ class DTable:
     """
     Represents a Table, in form of a 2D numpy array
     """
-
+    
     def __init__(self,
                  initial_table: dict | np.ndarray = None,
                  columns: list | np.ndarray = None,
@@ -184,6 +184,7 @@ class DTable:
 
         return DTable(r, dtype=self.dtype)
 
+
     def where(self, column: str, operator: str, value: str | int | float):
         """
         Returns a new subset table of the current table consisting of rows
@@ -310,6 +311,9 @@ class DTable:
         return DTable(table, columns=self.columns, dtype=self.dtype)
 
     def intersection(self, dt):
+        if not isinstance(dt, DTable):
+            raise ValueError("Passed parameter is not an instance of DTable")
+
         table1 = self.table[1:]
         table2 = dt.table[1:]
 
@@ -323,10 +327,35 @@ class DTable:
 
         # Converting the intersection table again into numpy array
         intersection_table = np.array(intersection)
+        if len(intersection_table) == 0:
+            return DTable(np.array([self.columns]))
         intersection_table = np.vstack((self.columns, intersection_table))
 
         # Returning the intersection
-        return DTable(intersection_table, dtype=self.dtype)
+        return DTable(intersection_table)
+    
+    def variance(self, column):
+        # Storing in an array.
+        data_array = self.select_column(column).table[:, 1][1:]
+        data_array = data_array[data_array != "nan"]
+        data_array = data_array.astype('float')
+        
+        # Calculating Variance
+        overall_variance = np.var(data_array)
+        
+        # Returning the calculated Variance.
+        return overall_variance
+    
+    def standard_deviation(self, column):
+        data_array = self.select_column(column).table[:, 1][1:]
+        data_array = data_array[data_array != "nan"]
+        data_array = data_array.astype('float')
+
+        # Calculating Standard Deviation
+        overall_standard_deviation = np.std(data_array)
+
+        # Returning the calculated Standard Deviation.
+        return overall_standard_deviation
 
     def to_html(self, file_name: str = None):
         """
@@ -364,16 +393,6 @@ class DTable:
 
         # Return the HTML form of the DTable
         return dt_html
-    
-    def variance(self, column):
-        # Storing the values in an array.
-        data_array = self.select_column(column).table[:, -1][1:].astype('float')
-
-        # Calculating variance
-        overall_variance = np.var(data_array, axis=None)
-
-        # Returning the Variance
-        return overall_variance
 
     def count(self, column: str) -> int:
         """
@@ -402,7 +421,6 @@ class DTable:
         median = np.median(col)
 
         return median
-
 
 
 def read_csv(file_path: str) -> DTable:
@@ -510,9 +528,8 @@ dset = {
 
 start = time.time()
 
-dt = read_csv("dsets/ign.csv")
-print(dt.median("score"))
-
+# dt = read_csv("dsets/ign.csv")
+# print(dt)
 
 end = time.time()
 print(f"T1: {end - start}")
