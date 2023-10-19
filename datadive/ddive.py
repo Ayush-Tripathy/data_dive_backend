@@ -23,20 +23,23 @@ class DTable:
             # If passed initial_table data is an instance of dict class
 
             self.columns = np.array([key for key in initial_table.keys()])
+            if "" in self.columns:
+                self.columns = np.array([f"Unnamed{idx}" if col == "" else col for idx, col in enumerate(self.columns)])
             column_data = [initial_table[key] for key in initial_table.keys()]
             self.table = np.array(column_data, dtype=dtype).T
             self.table = np.insert(self.table, 0, self.columns, axis=0)
-            # self.table = self.table[1:].astype(float)
             self.column_types = {column: None for column in self.columns}
 
         elif isinstance(initial_table, np.ndarray):
             # If passed initial_table data is an instance of numpy.ndarray class
 
             self.columns = initial_table[0]
+            if "" in self.columns:
+                self.columns = np.array([f"Unnamed{idx}" if col == "" else col for idx, col in enumerate(self.columns)])
             column_data = initial_table[1:]
             self.table = np.array(column_data, dtype=dtype)
-            # self.table = np.insert(self.table, 0, column_names, axis=0)
-            self.table = np.vstack((self.columns, self.table))
+            self.table = np.insert(self.table, 0, self.columns, axis=0)
+            # self.table = np.vstack((self.columns, self.table))
             self.column_types = {column: None for column in self.columns}
 
         elif initial_table is None:
@@ -45,7 +48,7 @@ class DTable:
 
         else:
             raise ValueError(
-                "'initial_table' should be a instance of dict or np.ndarray or None")
+                "arg1 of DTable should be a instance of dict or np.ndarray or None")
 
         if columns is not None:
             # if len(columns) != len(self.columns):
@@ -53,6 +56,7 @@ class DTable:
 
             self.columns = np.array(columns)
 
+        # print(self.columns)
         # Classifying the column data into data types
         for header, values in zip(self.columns, self.table[1:].T):
             unique_values = set(values)
@@ -65,6 +69,9 @@ class DTable:
                 self.column_types[header] = 'Category'
             else:
                 self.column_types[header] = "String"
+
+        # Fill the empty cells
+        self.table = np.where(self.table == "", np.nan, self.table)
 
     def __repr__(self):
         if len(self.table) == 0:
@@ -110,14 +117,14 @@ class DTable:
         """
         return self.column_types
 
-    def select_column(self, column=None):
+    def select_column(self, column):
         """
         Creates a new DTable from the whole table consisting only the specified column of the table
         :param column:
         :return: DTable
         """
-        if column is None or column not in self.get_columns():
-            return np.array([])
+        if column not in self.get_columns():
+            raise ValueError(f"No column named '{column}' found")
         idx = np.where(self.get_columns() == column)[0][0]
 
         values = self.table[:, idx][1:]
@@ -211,9 +218,15 @@ class DTable:
         except KeyError:
             raise ValueError(f"'{column}' column not found")
 
-        table = None
-        if operator == "==":
+        if operator == "equals" or operator == "==":
+            print("equals called")
             if col_type == "Number":
+                try:
+                    value = float(value)
+                except ValueError:
+                    print(f"value: {value}, {type(value)}")
+                    pass
+
                 if type(value) not in [int, float]:
                     raise ArithmeticError(
                         f"Can't compare a {col_type} with {type(value)}")
@@ -230,10 +243,15 @@ class DTable:
                 idxs = np.where(col == value)[0]
                 idxs = np.array([idx + 1 for idx in idxs])
 
-        elif operator == ">":
+        elif operator == "is greater than" or operator == ">":
 
             if col_type != "Number":
                 raise ArithmeticError(f"Invalid operand for column '{column}'")
+
+            try:
+                value = float(value)
+            except ValueError:
+                pass
 
             if type(value) not in [int, float]:
                 raise ArithmeticError(
@@ -245,10 +263,15 @@ class DTable:
             idxs = np.where(col > value)[0]
             idxs = np.array([idx + 1 for idx in idxs])
 
-        elif operator == "<":
+        elif operator == "is less than" or operator == "<":
 
             if col_type != "Number":
                 raise ArithmeticError(f"Invalid operand for column '{column}'")
+
+            try:
+                value = float(value)
+            except ValueError:
+                pass
 
             if type(value) not in [int, float]:
                 raise ArithmeticError(
@@ -260,23 +283,21 @@ class DTable:
             idxs = np.where(col < value)[0]
             idxs = np.array([idx + 1 for idx in idxs])
 
-        elif operator == "!=":
-            if col_type == "Number":
-                if type(value) not in [int, float]:
-                    raise ArithmeticError(
-                        f"Can't compare a {col_type} with {type(value)}")
+        elif operator == "!=" or (operator == "is not" and col_type == "Number"):
+            try:
+                value = float(value)
+            except ValueError:
+                pass
 
-                col = self.table[:, col_index][1:].astype("float")
+            if type(value) not in [int, float]:
+                raise ArithmeticError(
+                    f"Can't compare a {col_type} with {type(value)}")
 
-                # Get the indexes of field satisfying the condition
-                idxs = np.where(col != value)[0]
-                idxs = np.array([idx+1 for idx in idxs])
-            else:
-                col = self.table[:, col_index][1:]
+            col = self.table[:, col_index][1:].astype("float")
 
-                # Get the indexes of field satisfying the condition
-                idxs = np.where(col != value)[0]
-                idxs = np.array([idx + 1 for idx in idxs])
+            # Get the indexes of field satisfying the condition
+            idxs = np.where(col != value)[0]
+            idxs = np.array([idx+1 for idx in idxs])
 
         elif operator == "begins with":
             if col_type == "Number":
@@ -298,6 +319,28 @@ class DTable:
             idxs = np.where(np.char.find(col, value) != -1)[0]
             idxs = np.array([idx + 1 for idx in idxs])
 
+        elif operator == "is":
+            if col_type == "Number":
+                raise ArithmeticError(
+                    f"Can't compare a {col_type} with {type(value)}")
+            else:
+                col = self.table[:, col_index][1:]
+
+                # Get the indexes of field satisfying the condition
+                idxs = np.where(col == value)[0]
+                idxs = np.array([idx + 1 for idx in idxs])
+
+        elif operator == "is not":
+            if col_type == "Number":
+                raise ArithmeticError(
+                    f"Can't compare a {col_type} with {type(value)}")
+            else:
+                col = self.table[:, col_index][1:]
+
+                # Get the indexes of field satisfying the condition
+                idxs = np.where(col != value)[0]
+                idxs = np.array([idx + 1 for idx in idxs])
+
         else:
             raise ValueError(f"Invalid operator '{operator}'")
 
@@ -305,6 +348,8 @@ class DTable:
         if len(idxs) != 0:
             table = np.vstack(
                 (self.get_columns(), [self.table[idx, ] for idx in idxs]))
+        else:
+            table = np.array([self.get_columns()])
 
         # Return new DTable using the new numpy array built
         return DTable(table, columns=self.columns, dtype=self.dtype)
@@ -376,7 +421,6 @@ class DTable:
         return overall_variance
 
 
-
 def read_csv(file_path: str) -> DTable:
     """
     Reads a csv file to create a dictionary holding keys as columns
@@ -386,10 +430,10 @@ def read_csv(file_path: str) -> DTable:
     :param file_path:
     :return: ddive.DTable
     """
-    import os  # Only used for checking the size of dataset file
+    from os.path import getsize  # Only used for checking the size of dataset file
 
     # size of file in KiB
-    size_of_file = os.path.getsize(file_path) / 1024
+    size_of_file = getsize(file_path) / 1024
 
     # 10 MiB
     mib_10 = 10 * 1024
@@ -399,7 +443,9 @@ def read_csv(file_path: str) -> DTable:
     with open(file_path, 'r', encoding='utf-8') as file:
 
         # Get the column headers from the file
+        # Fill the empty column headers
         headers = file.readline().strip().split(',')
+        headers = [f"Unnamed{idx}" if col == "" else col for idx, col in enumerate(headers)]
 
         # Get the rest of the lines from the file
         lines = [line.strip() for line in file]
@@ -481,10 +527,9 @@ dset = {
 # print(f"T2: {e2-s2}")
 
 start = time.time()
-
+# t = DTable(dset)
 dt = read_csv("dsets/ign.csv")
-# print(dt)
-
+print(dt)
 
 end = time.time()
 print(f"T1: {end - start}")

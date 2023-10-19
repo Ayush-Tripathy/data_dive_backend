@@ -1,4 +1,4 @@
-from ddive import DTable
+from datadive.ddive import DTable
 
 
 def get_column_type(dt: DTable, column: str) -> str:
@@ -28,9 +28,9 @@ def read_csv_v2(file_path: str, dtype: str = "<U255") -> DTable:
     :return: DTable
     """
 
-    import os  # Only used for checking the size of dataset file
+    from os.path import getsize  # Only used for checking the size of dataset file
     # size of the file in KiB
-    size_of_file = os.path.getsize(file_path) / 1024
+    size_of_file = getsize(file_path) / 1024
 
     # 30 MiB
     mib_30 = 30 * 1024
@@ -74,6 +74,14 @@ def read_csv_v2(file_path: str, dtype: str = "<U255") -> DTable:
 
 
 def select_rows(c_dt: DTable, conditions: list[list]) -> DTable:
+    """
+    Creates a DTable from another DTable's rows, the new DTable will
+    hold rows which satisfy all the given conditions.
+    :param c_dt:
+    :param conditions:
+    :return: DTable
+    """
+
     new_dts = []
 
     # Get data tables by applying each condition
