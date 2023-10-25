@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
-import os
+import os, time
 import datadive as dd
 
 app = Flask(__name__)
@@ -16,7 +16,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route("/")
 def home():
-    return "Working correctly!"
+    return jsonify("OK")
 
 
 @app.route('/upload', methods=['PUT', 'POST'])
@@ -39,7 +39,6 @@ def upload_file():
 def get_columns():
     dt = dd.read_html(str(request.data))
     columns = dt.get_columns().tolist()
-    print(columns)
     return jsonify(data=columns)
 
 
@@ -76,6 +75,23 @@ def select_rows_handler():
     dt = dd.read_html(html)
     dt = dd.select_rows(dt, conditions)
     return jsonify(data=dt.to_html())
+
+
+@app.route('/get_info', methods=['POST'])
+def get_info():
+    data = str(request.data)
+    dt = dd.read_html(data)
+    return jsonify(data=dt.info())
+
+
+@app.route('/to_csv', methods=['POST'])
+def convert_to_csv():
+    data = str(request.data)
+    dt = dd.read_html(data)
+    t = time.time()
+    csv_file_path = f"./conversions/CSV{int(t)}.csv"
+    dt.to_csv(csv_file_path)
+    return send_file(csv_file_path, as_attachment=True)
 
 
 if __name__ == "__main__":
