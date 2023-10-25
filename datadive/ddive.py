@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import matplotlib.pyplot as plt
 
 max_display_rows = 10
 
@@ -80,8 +81,10 @@ class DTable:
             rows = "\n".join("\t".join(str(cell)[:10]
                              for cell in row) for row in self.table)
         else:
+            idx_f = int(max_display_rows / 2) + 2
+            idx_l = max_display_rows - idx_f + 1
             rows = "\n".join("\t".join(str(cell)[:10] for cell in row) for row in
-                             np.concatenate((self.table[0:max_display_rows - 4], self.table[len(self.table) - 4:])))
+                             np.concatenate((self.table[0:idx_f], self.table[len(self.table) - idx_l:])))
         return f"{rows}"
 
     def info(self):
@@ -451,7 +454,7 @@ class DTable:
         # Filter not nan values
         filtered_col = col[col != "nan"]
 
-        return len(filtered_col)
+        return len(filtered_col) - 1
 
     def median(self, column):
         """
@@ -465,6 +468,120 @@ class DTable:
         median = np.median(col)
 
         return median
+
+    def to_csv(self, filename: str) -> None:
+        """
+        This function converts the current table to CSV format
+        :param filename:
+        :return: None
+        """
+        with open(filename, "w+", encoding="utf-8") as file:
+            csv_string = ''
+            # Headers
+            headers = ",".join(self.get_columns()) + "\n"
+            csv_string += headers
+
+            # Rest data
+            data = "\n".join((",".join(f'"{value}"' if "," in value else value for value in row))
+                             for row in self.table[1:])
+            csv_string += data
+
+            file.write(csv_string)
+
+    def scatter_plot(self, x: str, y: str, drange: tuple = None) -> None:
+        """
+        Creates a scatter plot for given column names (x and y)
+        :param x: Column name to be plotted on x-axis
+        :param y: Column name to be plotted on y-axis
+        :param drange: Range for number of points
+        :return: None
+        """
+        if drange is not None:
+            drange = (drange[0]+1, drange[1]+1)
+        else:
+            drange = (1, None)
+
+        x_data = self.select_column(x).table[:, 1][drange[0]: drange[1]]
+        y_data = self.select_column(y).table[:, 1][drange[0]: drange[1]]
+
+        if self.get_column_types()[x] == "Number":
+            x_data = x_data.astype("float")
+
+        if self.get_column_types()[y] == "Number":
+            y_data = y_data.astype("float")
+
+        plt.scatter(x_data, y_data, s=15)
+        plt.xlabel(x)
+        plt.ylabel(y)
+        plt.legend([y])
+        if self.get_column_types()[x] == "String":
+            plt.xticks(rotation=90)
+
+    def bar_plot(self, x: str = None, y: str = None, drange: tuple = None, exclude: list = None) -> None:
+        """
+        Creates a bar plot based on given x and y, if x and y not specified
+        the creates bar plot for all the numeric columns present in table.
+        :param x:
+        :param y:
+        :param drange:
+        :param exclude:
+        :return: None
+        """
+        if drange is not None:
+            drange = (drange[0]+1, drange[1]+1)
+        else:
+            drange = (1, None)
+
+        if x is not None and y is not None:
+
+            x_data = self.select_column(x).table[:, 1][drange[0]: drange[1]]
+            y_data = self.select_column(y).table[:, 1][drange[0]: drange[1]]
+
+            # if self.get_column_types()[x] == "Number":
+            #     x_data = x_data.astype("int")
+
+            if self.get_column_types()[y] == "Number":
+                y_data = y_data.astype("float")
+
+            indices = np.arange(len(x_data))
+            plt.bar(indices, y_data, width=0.5, tick_label=x_data, label=y)
+            if self.get_column_types()[x] == "String":
+                plt.xticks(rotation=90)
+            plt.legend()
+
+        else:
+            number_cols = []
+            col_types = self.get_column_types()
+            for k, v in col_types.items():
+                if v == "Number" and k not in exclude:
+                    number_cols.append(k)
+
+            data_lists = []
+
+            for col in number_cols:
+                arr = self.select_column(col).table[:, 1][drange[0]: drange[1]].astype('float')
+                data_lists.append(arr)
+
+            if drange[1] is not None:
+                x_ticks = np.arange(drange[1] - drange[0])
+            else:
+                x_ticks = np.arange(len(data_lists[0]))
+
+            bar_width = 0.5
+            number_cols_len = len(number_cols)
+            offset = bar_width / number_cols_len
+            current_offset = offset * (number_cols_len / 2)
+            if number_cols_len > 1:
+                current_offset *= -1
+            else:
+                current_offset = 0
+
+            for idx, arr in enumerate(data_lists):
+                plt.bar(x_ticks + current_offset, arr, width=offset, label=number_cols[idx])
+                current_offset += offset
+
+            plt.xticks(x_ticks)
+            plt.legend()
 
 
 def read_csv(file_path: str) -> DTable:
@@ -529,6 +646,7 @@ def read_html(html_str: str) -> DTable:
     then returns a DTable object based on the created array.
 
     **Note**: This method assumes that the passed string is a valid HTML string
+    constructed from DTable.to_html() method,
     if invalid HTML table string is passed it may cause errors,
     use it cautiously.
 
@@ -538,7 +656,7 @@ def read_html(html_str: str) -> DTable:
 
     # Split the string to remove all 'tr' tags
     # Each element of the rows list will have single row of the HTML table
-    rows = html_str.split("<tr>")[1:-1]
+    rows = html_str.split("<tr>")[1:]
     rows = [v.split("</tr>")[0] for v in rows]
 
     # Parse the headers
@@ -548,13 +666,17 @@ def read_html(html_str: str) -> DTable:
     values = np.array([[v.split("</td>")[0] for v in row.split("<td>") if "</td>" in v] for row in rows[1:]])
 
     # Build and return Table
-    data = np.vstack((headers, values))
+    if len(values) != 0:
+        data = np.vstack((headers, values))
+    else:
+        data = np.array([headers])
+
     return DTable(data)
 
 
 # -------------- TESTING --------------------
 dset = {
-    "col1": [4, 2, 3, 7],
+    "col1": [4, 2, 3, 3],
     "col2": [5, 4, 3, 0],
     "col3": [6, 5.4, 5., 0],
     "col4": ["hi", "bye", "hello", "hi"],
@@ -574,8 +696,7 @@ dset = {
 
 start = time.time()
 # t = DTable(dset)
-dt = read_csv("dsets/ign.csv")
-print(dt)
+# dt = read_csv("dsets/ign.csv")
 
 end = time.time()
 print(f"T1: {end - start}")
