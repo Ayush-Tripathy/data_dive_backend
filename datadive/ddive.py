@@ -606,7 +606,6 @@ class DTable:
         # Find mode indexes
         mode = np.argwhere(counts == np.max(counts))
 
-        # Return mode array
         return values[mode].flatten()
 
 
