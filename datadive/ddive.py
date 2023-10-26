@@ -596,6 +596,19 @@ class DTable:
 
         return mean
 
+    def mode(self, column):
+        # Get column values
+        col = self.select_column(column).table[:, 1][1:]
+
+        # Find unique values in array
+        values, counts = np.unique(col, return_counts=True)
+
+        # Find mode indexes
+        mode = np.argwhere(counts == np.max(counts))
+
+        # Return mode array
+        return values[mode].flatten()
+
 
 def read_csv(file_path: str) -> DTable:
     """
