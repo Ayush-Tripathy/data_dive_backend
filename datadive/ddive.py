@@ -583,6 +583,19 @@ class DTable:
             plt.xticks(x_ticks)
             plt.legend()
 
+    def mean(self, column):
+        """
+        This function will return the median of input column 
+        """
+        if column not in self.columns:
+            raise ValueError(f"'{column}' not found")
+        
+        col = self.select_column(column).table[:, 1][1:].astype("float")
+
+        mean = np.mean(col)
+
+        return mean
+
 
 def read_csv(file_path: str) -> DTable:
     """
@@ -696,7 +709,7 @@ dset = {
 
 start = time.time()
 # t = DTable(dset)
-# dt = read_csv("dsets/ign.csv")
-
+#dt = read_csv("dsets/ign.csv")
+#print (dt.mean("score"))
 end = time.time()
 print(f"T1: {end - start}")
