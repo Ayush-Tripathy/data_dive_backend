@@ -595,6 +595,22 @@ class DTable:
         mean = np.mean(col)
 
         return mean
+    
+    def line_plot(self, x: str, drange: tuple = None) -> None:
+        """
+        Creates a line plot for given column names (x and y)
+        """
+        if drange is not None:
+            drange = (drange[0]+1, drange[1]+1)
+        else:
+            drange = (1, None)
+
+        x_data = self.select_column(x).table[:, 1][drange[0]: drange[1]]
+
+        if self.get_column_types()[x] == "Number":
+            x_data = x_data.astype("float")
+
+        plt.plot(x_data)
 
 
 def read_csv(file_path: str) -> DTable:
@@ -709,7 +725,7 @@ dset = {
 
 start = time.time()
 # t = DTable(dset)
-#dt = read_csv("dsets/ign.csv")
-#print (dt.mean("score"))
+# dt = read_csv("dsets/ign.csv")
+
 end = time.time()
 print(f"T1: {end - start}")
