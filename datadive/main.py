@@ -100,6 +100,16 @@ def main():
                     else:
                         print("invalid choice")
 
+            elif choice == "3":
+                col = input("Enter column name: ")
+                try:
+                    print(f"Mean: {selected_dt.mean(col)}")
+                except ValueError as v:
+                    if str(v).split(":")[0] == f"No column named '{col}' found":
+                        print(v)
+                    else:
+                        print("Column has non numeric values, try again with column that has only numeric values")
+
             elif choice == "4":
                 col = input("Enter column name: ")
                 try:
