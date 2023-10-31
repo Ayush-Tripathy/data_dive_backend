@@ -740,12 +740,12 @@ dset = {
 
 start = time.time()
 # t = DTable(dset)
-dt = read_csv("dsets/ign.csv")
-print(dt.mean('score'))
+#dt = read_csv("dsets/ign.csv")
+#print(dt.mean('score'))
 
-plt.figure()
-dt.histogram_plot("score", drange= (0,15))
-plt.show()
+#plt.figure()
+#dt.histogram_plot("score", drange= (0,15))
+#plt.show()
 
 end = time.time()
 print(f"T1: {end - start}")
