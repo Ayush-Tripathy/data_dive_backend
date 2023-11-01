@@ -3,15 +3,15 @@ import matplotlib.pyplot as plt
 
 
 def print_menu():
-    options = ["1. Print a Column", "2. Print rows based on conditions",
-               "3. Calculate mean of a column", "4. Calculate median of a column",
-               "5. Calculate variance of a column", "6. Calculate standard deviation of a column",
-               "7. Count total number of not null values in a column", "8. Print all the column names",
-               "9. Print element at position", "10. Print info of Table",
-               "11. Print a Column types", "12. Print whole Table",
-               "13. Reset selection to whole table", "14. Convert selection to CSV",
-               "15. Set max display rows", "16. Create Scatter plot for column",
-               "17. Create Bar plot for column"]
+    options = ["1. Print a Column", "2. Print all the column names",
+               "3. Print all Column types", "4. Print rows based on conditions",
+               "5. Calculate mean of a column", "6. Calculate median of a column",
+               "7. Calculate mode of a column", "8. Calculate variance of a column",
+               "9. Calculate standard deviation of a column", "10. Count total number of not null values in a column",
+               "11. Print element at position", "12. Print info of Table",
+               "13. Print whole Table", "14. Reset selection to whole table",
+               "15. Convert selection to CSV", "16. Set max display rows",
+               "17. Create Scatter plot for column", "18. Create Bar plot for column"]
     cell_space = len(max(options, key=len))
     for i in range(0, len(options), 2):
         if i + 1 < len(options):
@@ -46,6 +46,16 @@ def main():
                     print(v)
 
             elif choice == "2":
+                print(selected_dt.get_columns())
+
+            elif choice == "3":
+                col_types = selected_dt.get_column_types()
+                col_space = len(max(col_types.keys(), key=len))
+                print(f"{'Column name':<{col_space}}\tColumn type")
+                for col_, type_ in col_types.items():
+                    print(f"{col_:<{col_space}}\t{type_}")
+
+            elif choice == "4":
                 conditions = []
                 while True:
                     c_input = input("Enter condition [col operator value] ('q' to discard): ")
@@ -100,7 +110,7 @@ def main():
                     else:
                         print("invalid choice")
 
-            elif choice == "4":
+            elif choice == "6":
                 col = input("Enter column name: ")
                 try:
                     print(f"Median: {selected_dt.median(col)}")
@@ -137,9 +147,6 @@ def main():
                 except ValueError as v:
                     print(v)
 
-            elif choice == "8":
-                print(selected_dt.get_columns())
-
             elif choice == "9":
                 try:
                     pos = input("Enter position [row col] (ignore column number to print whole row): ")
@@ -160,13 +167,6 @@ def main():
                 info = selected_dt.info()
                 print(f"Rows: {info['rows']}")
                 print(f"Columns: {info['cols']}")
-
-            elif choice == "11":
-                col_types = selected_dt.get_column_types()
-                col_space = len(max(col_types.keys(), key=len))
-                print(f"{'Column name':<{col_space}}\tColumn type")
-                for col_, type_ in col_types.items():
-                    print(f"{col_:<{col_space}}\t{type_}")
 
             elif choice == "12":
                 print(selected_dt)

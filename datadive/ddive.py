@@ -696,7 +696,7 @@ dset = {
 
 start = time.time()
 # t = DTable(dset)
-# dt = read_csv("dsets/ign.csv")
+# dt = read_csv("../dsets/ign.csv")
 
 end = time.time()
 print(f"T1: {end - start}")
