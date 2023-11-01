@@ -11,7 +11,10 @@ def print_menu():
                "11. Print element at position", "12. Print info of Table",
                "13. Print whole Table", "14. Reset selection to whole table",
                "15. Convert selection to CSV", "16. Set max display rows",
-               "17. Create Scatter plot for column", "18. Create Bar plot for column"]
+               "17. Create Scatter plot for column", "18. Create Bar plot for column",
+               "19. Create Pie plot for column", "20. Create Stem plot for column",
+               "21. Create Histogram for column", "22. Create Line plot for column"]
+
     cell_space = len(max(options, key=len))
     for i in range(0, len(options), 2):
         if i + 1 < len(options):
@@ -110,6 +113,16 @@ def main():
                     else:
                         print("invalid choice")
 
+            elif choice == "5":
+                col = input("Enter column name: ")
+                try:
+                    print(f"Mean: {selected_dt.count(col)}")
+                except ValueError as v:
+                    if str(v).split(":")[0] == f"No column named '{col}' found":
+                        print(v)
+                    else:
+                        print("Column has non numeric values, try again with column that has only numeric values")
+
             elif choice == "6":
                 col = input("Enter column name: ")
                 try:
@@ -120,7 +133,15 @@ def main():
                     else:
                         print("Column has non numeric values, try again with column that has only numeric values")
 
-            elif choice == "5":
+            elif choice == "7":
+                col = input("Enter column name: ")
+                try:
+                    print(f"Mode: {selected_dt.mode(col)}")
+                except ValueError as v:
+                    if str(v).split(":")[0] == f"No column named '{col}' found":
+                        print(v)
+
+            elif choice == "8":
                 col = input("Enter column name: ")
                 try:
                     print(f"Variance: {selected_dt.variance(col)}")
@@ -130,7 +151,7 @@ def main():
                     else:
                         print("Column has non numeric values, try again with column that has only numeric values")
 
-            elif choice == "6":
+            elif choice == "9":
                 col = input("Enter column name: ")
                 try:
                     print(f"Standard deviation: {selected_dt.standard_deviation(col)}")
@@ -140,14 +161,14 @@ def main():
                     else:
                         print("Column has non numeric values, try again with column that has only numeric values")
 
-            elif choice == "7":
+            elif choice == "10":
                 try:
                     col = input("Enter column name: ")
                     print(f"Count: {selected_dt.count(col)}")
                 except ValueError as v:
                     print(v)
 
-            elif choice == "9":
+            elif choice == "11":
                 try:
                     pos = input("Enter position [row col] (ignore column number to print whole row): ")
                     p = pos.strip().split(" ")
@@ -162,32 +183,32 @@ def main():
                 except ValueError as v:
                     print(v)
 
-            elif choice == "10":
+            elif choice == "12":
                 print("---INFO---")
                 info = selected_dt.info()
                 print(f"Rows: {info['rows']}")
                 print(f"Columns: {info['cols']}")
 
-            elif choice == "12":
+            elif choice == "13":
                 print(selected_dt)
 
-            elif choice == "13":
+            elif choice == "14":
                 selected_dt = dt
                 print("Reset selection")
 
-            elif choice == "14":
+            elif choice == "15":
                 filename = input("Enter filename: ")
                 selected_dt.to_csv(filename)
                 print("File saved successfully.")
 
-            elif choice == "15":
+            elif choice == "16":
                 try:
                     n = int(input("Enter max number of rows to display: "))
                     datadive.ddive.max_display_rows = n
                 except ValueError:
                     print("Invalid input, please try again with a number.")
 
-            elif choice == "16":
+            elif choice == "17":
                 x_col = input("Enter column name for x-axis: ")
                 y_col = input("Enter column name for y-axis: ")
                 try:
@@ -210,7 +231,7 @@ def main():
                 except ValueError:
                     print("Please enter valid range.")
 
-            elif choice == "17":
+            elif choice == "18":
                 print("Leave both fields blank to construct bar plot for all numeric columns.")
                 x_col = input("Enter column name for x-axis: ")
                 y_col = input("Enter column name for y-axis: ")
