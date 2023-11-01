@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
-import os, time
+import os
+import time
 import datadive as dd
 
 app = Flask(__name__)
