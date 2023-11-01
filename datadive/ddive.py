@@ -647,6 +647,38 @@ class DTable:
         mean = np.mean(col)
 
         return mean
+    
+    def line_plot(self, x: str, drange: tuple = None) -> None:
+        """
+        Creates a line plot for given column names (x and y)
+        """
+        if drange is not None:
+            drange = (drange[0]+1, drange[1]+1)
+        else:
+            drange = (1, None)
+
+        x_data = self.select_column(x).table[:, 1][drange[0]: drange[1]]
+
+        if self.get_column_types()[x] == "Number":
+            x_data = x_data.astype("float")
+
+        plt.plot(x_data)
+    
+    def histogram_plot(self, x: str, drange: tuple = None) -> None:
+        """
+        Creates a histogram plot for given column names (x and y)
+        """
+        if drange is not None:
+            drange = (drange[0]+1, drange[1]+1)
+        else:
+            drange = (1, None)
+
+        x_data = self.select_column(x).table[:, 1][drange[0]: drange[1]]
+
+        if self.get_column_types()[x] == "Number":
+            x_data = x_data.astype("float")
+
+        plt.hist(x_data)    
 
     def mode(self, column):
         # Get column values
@@ -774,10 +806,6 @@ dset = {
 start = time.time()
 # t = DTable(dset)
 #dt = read_csv("dsets/ign.csv")
-#print (dt.mean("score"))
 
-#plt.figure()
-#dt.stem_plot('score', 'score_phrase', drange=(0, 10))
-#plt.show()
 end = time.time()
 print(f"T1: {end - start}")
