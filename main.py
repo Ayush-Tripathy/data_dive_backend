@@ -116,7 +116,7 @@ def main():
             elif choice == "5":
                 col = input("Enter column name: ")
                 try:
-                    print(f"Mean: {selected_dt.count(col)}")
+                    print(f"Mean: {selected_dt.mean(col)}")
                 except ValueError as v:
                     if str(v).split(":")[0] == f"No column named '{col}' found":
                         print(v)
@@ -197,8 +197,8 @@ def main():
                 print("Reset selection")
 
             elif choice == "15":
-                filename = input("Enter filename: ")
-                selected_dt.to_csv(filename)
+                filename = input("Enter filename (without extension): ")
+                selected_dt.to_csv(f"{filename}.csv")
                 print("File saved successfully.")
 
             elif choice == "16":
@@ -260,6 +260,96 @@ def main():
                         pass
                     else:
                         print("Invalid input. ")
+                except ValueError:
+                    print("Please enter valid range.")
+
+            elif choice == "19":
+                x_col = input("Enter column name for x-axis: ")
+                y_col = input("Enter column name for y-axis: ")
+                try:
+                    l, u = map(int, input("Enter range [lower upper]: ").split(" "))
+
+                    plt.figure(figsize=(7, 6))
+                    selected_dt.pie_plot(x_col, y_col, drange=(l, u))
+                    plt.show()
+                    to_save = input("Do you want to save the figure to image?[Y N] ")
+
+                    if to_save.lower() in approval:
+                        filepath_ = input("Enter filename (without extension): ")
+                        selected_dt.pie_plot(x_col, y_col, drange=(l, u))
+                        plt.savefig(f"{filepath_}.png")
+                    elif to_save.lower() in denial:
+                        pass
+                    else:
+                        print("Invalid input. ")
+
+                except ValueError:
+                    print("Please enter valid range.")
+
+            elif choice == "20":
+                x_col = input("Enter column name for x-axis: ")
+                y_col = input("Enter column name for y-axis: ")
+                try:
+                    l, u = map(int, input("Enter range [lower upper]: ").split(" "))
+
+                    plt.figure(figsize=(7, 6))
+                    selected_dt.stem_plot(x_col, y_col, drange=(l, u))
+                    plt.show()
+                    to_save = input("Do you want to save the figure to image?[Y N] ")
+
+                    if to_save.lower() in approval:
+                        filepath_ = input("Enter filename (without extension): ")
+                        selected_dt.stem_plot(x_col, y_col, drange=(l, u))
+                        plt.savefig(f"{filepath_}.png")
+                    elif to_save.lower() in denial:
+                        pass
+                    else:
+                        print("Invalid input. ")
+
+                except ValueError:
+                    print("Please enter valid range.")
+
+            elif choice == "21":
+                x_col = input("Enter column name: ")
+                try:
+                    l, u = map(int, input("Enter range [lower upper]: ").split(" "))
+
+                    plt.figure(figsize=(7, 6))
+                    selected_dt.histogram_plot(x_col, drange=(l, u))
+                    plt.show()
+                    to_save = input("Do you want to save the figure to image?[Y N] ")
+
+                    if to_save.lower() in approval:
+                        filepath_ = input("Enter filename (without extension): ")
+                        selected_dt.histogram_plot(x_col, drange=(l, u))
+                        plt.savefig(f"{filepath_}.png")
+                    elif to_save.lower() in denial:
+                        pass
+                    else:
+                        print("Invalid input. ")
+
+                except ValueError:
+                    print("Please enter valid range.")
+
+            elif choice == "22":
+                x_col = input("Enter column name: ")
+                try:
+                    l, u = map(int, input("Enter range [lower upper]: ").split(" "))
+
+                    plt.figure(figsize=(7, 6))
+                    selected_dt.line_plot(x_col, drange=(l, u))
+                    plt.show()
+                    to_save = input("Do you want to save the figure to image?[Y N] ")
+
+                    if to_save.lower() in approval:
+                        filepath_ = input("Enter filename (without extension): ")
+                        selected_dt.line_plot(x_col, drange=(l, u))
+                        plt.savefig(f"{filepath_}.png")
+                    elif to_save.lower() in denial:
+                        pass
+                    else:
+                        print("Invalid input. ")
+
                 except ValueError:
                     print("Please enter valid range.")
 

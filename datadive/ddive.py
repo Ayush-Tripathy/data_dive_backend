@@ -1,4 +1,3 @@
-import time
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -201,7 +200,7 @@ class DTable:
         Example use:-
 
         >>> data_set = {"col1": [4, 2, 3, 7], "col2": [5, 4, 3, 0], "col3": [6, 5.4, 5., 0]}
-        >>> dt_ = DTable(dset)
+        >>> dt_ = DTable(data_set)
         >>> new_dt = dt_.where("col3", ">", 5.5)
 
         Here, 'new_dt' will hold all the rows of the 'dt' Table in which
@@ -222,12 +221,10 @@ class DTable:
             raise ValueError(f"'{column}' column not found")
 
         if operator == "equals" or operator == "==":
-            print("equals called")
             if col_type == "Number":
                 try:
                     value = float(value)
                 except ValueError:
-                    print(f"value: {value}, {type(value)}")
                     pass
 
                 if type(value) not in [int, float]:
@@ -404,6 +401,59 @@ class DTable:
         # Returning the calculated Standard Deviation.
         return overall_standard_deviation
 
+    def count(self, column: str) -> int:
+        """
+        Returns the count of (defined) values present in specified column
+        """
+        if column not in self.columns:
+            raise ValueError(f"'{column}' not found")
+        
+        # Get column values
+        col = self.select_column(column).table[:, 1][1:]
+        
+        # Filter not nan values
+        filtered_col = col[col != "nan"]
+
+        return len(filtered_col) - 1
+
+    def mean(self, column):
+        """
+        This function will return the median of input column
+        """
+        if column not in self.columns:
+            raise ValueError(f"'{column}' not found")
+
+        col = self.select_column(column).table[:, 1][1:].astype("float")
+
+        mean = np.mean(col)
+
+        return mean
+
+    def median(self, column):
+        """
+        Returns the median of input column 
+        """
+        if column not in self.columns:
+            raise ValueError(f"'{column}' not found")
+        
+        col = self.select_column(column).table[:, 1][1:].astype("float")
+
+        median = np.median(col)
+
+        return median
+
+    def mode(self, column):
+        # Get column values
+        col = self.select_column(column).table[:, 1][1:]
+
+        # Find unique values in array
+        values, counts = np.unique(col, return_counts=True)
+
+        # Find mode indexes
+        mode = np.argwhere(counts == np.max(counts))
+
+        return values[mode].flatten()
+
     def to_html(self, file_name: str = None):
         """
         Builds HTML string for the DTable
@@ -440,34 +490,6 @@ class DTable:
 
         # Return the HTML form of the DTable
         return dt_html
-
-    def count(self, column: str) -> int:
-        """
-        Returns the count of (defined) values present in specified column
-        """
-        if column not in self.columns:
-            raise ValueError(f"'{column}' not found")
-        
-        # Get column values
-        col = self.select_column(column).table[:, 1][1:]
-        
-        # Filter not nan values
-        filtered_col = col[col != "nan"]
-
-        return len(filtered_col) - 1
-
-    def median(self, column):
-        """
-        Returns the median of input column 
-        """
-        if column not in self.columns:
-            raise ValueError(f"'{column}' not found")
-        
-        col = self.select_column(column).table[:, 1][1:].astype("float")
-
-        median = np.median(col)
-
-        return median
 
     def to_csv(self, filename: str) -> None:
         """
@@ -634,19 +656,6 @@ class DTable:
         plt.ylabel(y)
         plt.legend([y])
     
-    def mean(self, column):
-        """
-        This function will return the median of input column 
-        """
-        if column not in self.columns:
-            raise ValueError(f"'{column}' not found")
-        
-        col = self.select_column(column).table[:, 1][1:].astype("float")
-
-        mean = np.mean(col)
-
-        return mean
-    
     def line_plot(self, x: str, drange: tuple = None) -> None:
         """
         Creates a line plot for given column names (x and y)
@@ -677,19 +686,7 @@ class DTable:
         if self.get_column_types()[x] == "Number":
             x_data = x_data.astype("float")
 
-        plt.hist(x_data)    
-
-    def mode(self, column):
-        # Get column values
-        col = self.select_column(column).table[:, 1][1:]
-
-        # Find unique values in array
-        values, counts = np.unique(col, return_counts=True)
-
-        # Find mode indexes
-        mode = np.argwhere(counts == np.max(counts))
-
-        return values[mode].flatten()
+        plt.hist(x_data)
 
 
 def read_csv(file_path: str) -> DTable:
@@ -780,31 +777,3 @@ def read_html(html_str: str) -> DTable:
         data = np.array([headers])
 
     return DTable(data)
-
-
-# -------------- TESTING --------------------
-dset = {
-    "col1": [4, 2, 3, 3],
-    "col2": [5, 4, 3, 0],
-    "col3": [6, 5.4, 5., 0],
-    "col4": ["hi", "bye", "hello", "hi"],
-    "col5": ["Y", "Y", "N", "Y"],
-    "col6": ["cat", "cat", "cat", "cat"]
-}
-
-
-# s2 = time.time()
-# t = DTable(dset)
-# print(t.get_columns())
-# print(t.get_column_types())
-# print(t.get_column("col6"))
-# print(t.where("col3", ">", 5.5))
-# e2 = time.time()
-# print(f"T2: {e2-s2}")
-
-start = time.time()
-# t = DTable(dset)
-# dt = read_csv("../dsets/ign.csv")
-
-end = time.time()
-print(f"T1: {end - start}")
