@@ -583,6 +583,58 @@ class DTable:
             plt.xticks(x_ticks)
             plt.legend()
 
+    def pie_plot(self, x: str, y: str, drange: tuple = None) -> None:
+        """
+        Creates a pie plot for given column names (x and y)
+        :param x: Column name to be plotted on x-axis
+        :param y: Column name to be plotted on y-axis
+        :param drange: Range for number of points
+        :return: None
+        """
+        if drange is not None:
+            drange = (drange[0]+1, drange[1]+1)
+        else:
+            drange = (1, None)
+
+        x_data = self.select_column(x).table[:, 1][drange[0]: drange[1]]
+        y_data = self.select_column(y).table[:, 1][drange[0]: drange[1]]
+
+        if self.get_column_types()[x] == "Number":
+            x_data = x_data.astype("float")
+
+        if self.get_column_types()[y] == "Number":
+            y_data = y_data.astype("float")
+
+        plt.pie(x_data, labels = y_data)
+
+
+    def stem_plot(self, x: str, y: str, drange: tuple = None) -> None:
+        """
+        Creates a stem plot for given column names (x and y)
+        :param x: Column name to be plotted on x-axis
+        :param y: Column name to be plotted on y-axis
+        :param drange: Range for number of points
+        :return: None
+        """
+        if drange is not None:
+            drange = (drange[0]+1, drange[1]+1)
+        else:
+            drange = (1, None)
+
+        x_data = self.select_column(x).table[:, 1][drange[0]: drange[1]]
+        y_data = self.select_column(y).table[:, 1][drange[0]: drange[1]]
+
+        if self.get_column_types()[x] == "Number":
+            x_data = x_data.astype("float")
+
+        if self.get_column_types()[y] == "Number":
+            y_data = y_data.astype("float")
+
+        plt.stem(x_data, y_data, linefmt = ":", markerfmt = "ro")
+        plt.xlabel(x)
+        plt.ylabel(y)
+        plt.legend([y])
+    
     def mean(self, column):
         """
         This function will return the median of input column 
@@ -627,6 +679,19 @@ class DTable:
             x_data = x_data.astype("float")
 
         plt.hist(x_data)    
+
+    def mode(self, column):
+        # Get column values
+        col = self.select_column(column).table[:, 1][1:]
+
+        # Find unique values in array
+        values, counts = np.unique(col, return_counts=True)
+
+        # Find mode indexes
+        mode = np.argwhere(counts == np.max(counts))
+
+        return values[mode].flatten()
+
 
 def read_csv(file_path: str) -> DTable:
     """
@@ -741,11 +806,6 @@ dset = {
 start = time.time()
 # t = DTable(dset)
 #dt = read_csv("dsets/ign.csv")
-#print(dt.mean('score'))
-
-#plt.figure()
-#dt.histogram_plot("score", drange= (0,15))
-#plt.show()
 
 end = time.time()
 print(f"T1: {end - start}")
