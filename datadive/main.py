@@ -11,7 +11,7 @@ def print_menu():
                "11. Print a Column types", "12. Print whole Table",
                "13. Reset selection to whole table", "14. Convert selection to CSV",
                "15. Set max display rows", "16. Create Scatter plot for column",
-               "17. Create Bar plot for column"]
+               "17. Create Bar plot for column", "18. Count number of non blank values"]
     cell_space = len(max(options, key=len))
     for i in range(0, len(options), 2):
         if i + 1 < len(options):
@@ -251,6 +251,14 @@ def main():
                         print("Invalid input. ")
                 except ValueError:
                     print("Please enter valid range.")
+
+            elif choice == "18":
+                col = input("Enter column name: ")
+                try:
+                    print(f"Mean: {selected_dt.count(col)}")
+                except ValueError as v:
+                    if str(v).split(":")[0] == f"No column named '{col}' found":
+                        print(v)
 
             else:
                 print("Invalid choice, try again.")
