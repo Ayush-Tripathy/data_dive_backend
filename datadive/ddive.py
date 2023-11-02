@@ -422,6 +422,21 @@ class DTable:
         # Returning the calculated Variance.
         return overall_variance
     
+    def mode(self, column):
+        """
+        Returns the mode for a column
+        """
+        # Get column values
+        col = self.select_column(column).table[:, 1][1:]
+
+        # Find unique values in array
+        values, counts = np.unique(col, return_counts=True)
+
+        # Find mode indexes
+        mode = np.argwhere(counts == np.max(counts))
+
+        return values[mode].flatten()
+
     def standard_deviation(self, column):
         """
         Returns the standard deviation of a column present inside table using
@@ -451,21 +466,6 @@ class DTable:
         filtered_col = col[col != "nan"]
 
         return len(filtered_col) - 1
-
-    def mode(self, column):
-        """
-        Returns the mode for a column
-        """
-        # Get column values
-        col = self.select_column(column).table[:, 1][1:]
-
-        # Find unique values in array
-        values, counts = np.unique(col, return_counts=True)
-
-        # Find mode indexes
-        mode = np.argwhere(counts == np.max(counts))
-
-        return values[mode].flatten()
 
     def to_html(self, file_name: str = None):
         """
