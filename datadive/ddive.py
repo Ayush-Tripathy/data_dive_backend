@@ -658,6 +658,22 @@ class DTable:
         plt.xlabel(x)
         plt.ylabel(y)
         plt.legend([y])
+
+    def histogram_plot(self, x: str, drange: tuple = None) -> None:
+        """
+        Creates a histogram plot for given column names (x and y)
+        """
+        if drange is not None:
+            drange = (drange[0]+1, drange[1]+1)
+        else:
+            drange = (1, None)
+
+        x_data = self.select_column(x).table[:, 1][drange[0]: drange[1]]
+
+        if self.get_column_types()[x] == "Number":
+            x_data = x_data.astype("float")
+
+        plt.hist(x_data)
     
     def line_plot(self, x: str, drange: tuple = None) -> None:
         """
@@ -675,21 +691,6 @@ class DTable:
 
         plt.plot(x_data)
     
-    def histogram_plot(self, x: str, drange: tuple = None) -> None:
-        """
-        Creates a histogram plot for given column names (x and y)
-        """
-        if drange is not None:
-            drange = (drange[0]+1, drange[1]+1)
-        else:
-            drange = (1, None)
-
-        x_data = self.select_column(x).table[:, 1][drange[0]: drange[1]]
-
-        if self.get_column_types()[x] == "Number":
-            x_data = x_data.astype("float")
-
-        plt.hist(x_data)
 
 
 def read_csv(file_path: str) -> DTable:
