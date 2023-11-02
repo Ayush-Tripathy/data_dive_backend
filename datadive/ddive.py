@@ -690,6 +690,8 @@ class DTable:
     def histogram_plot(self, x: str, drange: tuple = None) -> None:
         """
         Creates a histogram plot for given column name using matplotlib
+        :param x: Column name to be plotted on x-axis
+        :param drange: Range for number of points
         """
         if drange is not None:
             drange = (drange[0]+1, drange[1]+1)
