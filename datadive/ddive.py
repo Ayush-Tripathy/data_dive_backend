@@ -443,6 +443,9 @@ class DTable:
         return median
 
     def mode(self, column):
+        """
+        Returns the mode for a column
+        """
         # Get column values
         col = self.select_column(column).table[:, 1][1:]
 
