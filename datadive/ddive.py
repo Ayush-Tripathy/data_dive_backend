@@ -381,6 +381,19 @@ class DTable:
         # Returning the intersection
         return DTable(intersection_table)
     
+    def mean(self, column):
+        """
+        This function will return the mean of input column using numpy library
+        """
+        if column not in self.columns:
+            raise ValueError(f"'{column}' not found")
+
+        col = self.select_column(column).table[:, 1][1:].astype("float")
+
+        mean = np.mean(col)
+
+        return mean
+
     def variance(self, column):
         """
         This function will returns the variance of the selected column. 
@@ -425,19 +438,6 @@ class DTable:
         filtered_col = col[col != "nan"]
 
         return len(filtered_col) - 1
-
-    def mean(self, column):
-        """
-        This function will return the mean of input column using numpy library
-        """
-        if column not in self.columns:
-            raise ValueError(f"'{column}' not found")
-
-        col = self.select_column(column).table[:, 1][1:].astype("float")
-
-        mean = np.mean(col)
-
-        return mean
 
     def median(self, column):
         """
