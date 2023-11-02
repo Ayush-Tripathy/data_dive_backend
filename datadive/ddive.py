@@ -355,6 +355,9 @@ class DTable:
         return DTable(table, columns=self.columns, dtype=self.dtype)
 
     def intersection(self, dt):
+        """
+        This function will returns the intersection of the selected Dtable
+        """
         if not isinstance(dt, DTable):
             raise ValueError("Passed parameter is not an instance of DTable")
 
@@ -379,6 +382,9 @@ class DTable:
         return DTable(intersection_table)
     
     def variance(self, column):
+        """
+        This function will returns the variance of the selected column. 
+        """
         # Storing in an array.
         data_array = self.select_column(column).table[:, 1][1:]
         data_array = data_array[data_array != "nan"]
