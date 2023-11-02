@@ -391,6 +391,10 @@ class DTable:
         return overall_variance
     
     def standard_deviation(self, column):
+        """
+        Returns the standard deviation of a column present inside table using
+        Numpy library
+        """
         data_array = self.select_column(column).table[:, 1][1:]
         data_array = data_array[data_array != "nan"]
         data_array = data_array.astype('float')
@@ -418,7 +422,7 @@ class DTable:
 
     def mean(self, column):
         """
-        This function will return the median of input column
+        This function will return the mean of input column using numpy library
         """
         if column not in self.columns:
             raise ValueError(f"'{column}' not found")
