@@ -556,10 +556,9 @@ class DTable:
         """
         Creates a bar plot based on given x and y, if x and y not specified
         the creates bar plot for all the numeric columns present in table.
-        :param x:
-        :param y:
-        :param drange:
-        :param exclude:
+        :param x: Column name to be plotted on x-axis
+        :param y: Column name to be plotted on y-axis
+        :param drange: Range for number of points
         :return: None
         """
         if drange is not None:
