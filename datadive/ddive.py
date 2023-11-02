@@ -661,7 +661,7 @@ class DTable:
 
     def line_plot(self, x: str, drange: tuple = None) -> None:
         """
-        Creates a line plot for given column names (x and y)
+        Creates a line plot for given column name using matplotlib
         """
         if drange is not None:
             drange = (drange[0]+1, drange[1]+1)
@@ -677,7 +677,7 @@ class DTable:
 
     def histogram_plot(self, x: str, drange: tuple = None) -> None:
         """
-        Creates a histogram plot for given column names (x and y)
+        Creates a histogram plot for given column name using matplotlib
         """
         if drange is not None:
             drange = (drange[0]+1, drange[1]+1)
