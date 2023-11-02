@@ -381,6 +381,32 @@ class DTable:
         # Returning the intersection
         return DTable(intersection_table)
     
+    def mean(self, column):
+        """
+        This function will return the mean of input column using numpy library
+        """
+        if column not in self.columns:
+            raise ValueError(f"'{column}' not found")
+
+        col = self.select_column(column).table[:, 1][1:].astype("float")
+
+        mean = np.mean(col)
+
+        return mean
+
+    def median(self, column):
+        """
+        Returns the median of input column 
+        """
+        if column not in self.columns:
+            raise ValueError(f"'{column}' not found")
+        
+        col = self.select_column(column).table[:, 1][1:].astype("float")
+
+        median = np.median(col)
+
+        return median
+
     def variance(self, column):
         """
         This function will returns the variance of the selected column. 
@@ -396,6 +422,21 @@ class DTable:
         # Returning the calculated Variance.
         return overall_variance
     
+    def mode(self, column):
+        """
+        Returns the mode for a column
+        """
+        # Get column values
+        col = self.select_column(column).table[:, 1][1:]
+
+        # Find unique values in array
+        values, counts = np.unique(col, return_counts=True)
+
+        # Find mode indexes
+        mode = np.argwhere(counts == np.max(counts))
+
+        return values[mode].flatten()
+
     def standard_deviation(self, column):
         """
         Returns the standard deviation of a column present inside table using
@@ -425,47 +466,6 @@ class DTable:
         filtered_col = col[col != "nan"]
 
         return len(filtered_col) - 1
-
-    def mean(self, column):
-        """
-        This function will return the mean of input column using numpy library
-        """
-        if column not in self.columns:
-            raise ValueError(f"'{column}' not found")
-
-        col = self.select_column(column).table[:, 1][1:].astype("float")
-
-        mean = np.mean(col)
-
-        return mean
-
-    def median(self, column):
-        """
-        Returns the median of input column 
-        """
-        if column not in self.columns:
-            raise ValueError(f"'{column}' not found")
-        
-        col = self.select_column(column).table[:, 1][1:].astype("float")
-
-        median = np.median(col)
-
-        return median
-
-    def mode(self, column):
-        """
-        Returns the mode for a column
-        """
-        # Get column values
-        col = self.select_column(column).table[:, 1][1:]
-
-        # Find unique values in array
-        values, counts = np.unique(col, return_counts=True)
-
-        # Find mode indexes
-        mode = np.argwhere(counts == np.max(counts))
-
-        return values[mode].flatten()
 
     def to_html(self, file_name: str = None):
         """
