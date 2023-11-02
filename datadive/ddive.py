@@ -355,6 +355,9 @@ class DTable:
         return DTable(table, columns=self.columns, dtype=self.dtype)
 
     def intersection(self, dt):
+        """
+        This function will returns the intersection of the selected Dtable
+        """
         if not isinstance(dt, DTable):
             raise ValueError("Passed parameter is not an instance of DTable")
 
@@ -379,6 +382,9 @@ class DTable:
         return DTable(intersection_table)
     
     def variance(self, column):
+        """
+        This function will returns the variance of the selected column. 
+        """
         # Storing in an array.
         data_array = self.select_column(column).table[:, 1][1:]
         data_array = data_array[data_array != "nan"]
@@ -391,6 +397,10 @@ class DTable:
         return overall_variance
     
     def standard_deviation(self, column):
+        """
+        Returns the standard deviation of a column present inside table using
+        Numpy library
+        """
         data_array = self.select_column(column).table[:, 1][1:]
         data_array = data_array[data_array != "nan"]
         data_array = data_array.astype('float')
@@ -418,7 +428,7 @@ class DTable:
 
     def mean(self, column):
         """
-        This function will return the median of input column
+        This function will return the mean of input column using numpy library
         """
         if column not in self.columns:
             raise ValueError(f"'{column}' not found")
@@ -661,7 +671,9 @@ class DTable:
 
     def line_plot(self, x: str, drange: tuple = None) -> None:
         """
-        Creates a line plot for given column names (x and y)
+        Creates a line plot for given column name using matplotlib
+        :param x: Column name to be plotted on x-axis
+        :param drange: Range for number of points
         """
         if drange is not None:
             drange = (drange[0]+1, drange[1]+1)
@@ -677,7 +689,9 @@ class DTable:
 
     def histogram_plot(self, x: str, drange: tuple = None) -> None:
         """
-        Creates a histogram plot for given column names (x and y)
+        Creates a histogram plot for given column name using matplotlib
+        :param x: Column name to be plotted on x-axis
+        :param drange: Range for number of points
         """
         if drange is not None:
             drange = (drange[0]+1, drange[1]+1)
